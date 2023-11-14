@@ -1,26 +1,19 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9
+FROM python:3.11-slim-buster
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+RUN apt-get update && apt-get upgrade -y
 
-# Set work directory
-WORKDIR /usr/src/app
+ENV APP_ROOT /app
+WORKDIR ${APP_ROOT}
 
-# Install dependencies
-COPY requirements.txt /usr/src/app/
+ARG POETRY_VERSION=1.4.2
+COPY requirements.txt requirements.txt
+RUN pip install poetry==$POETRY_VERSION
+RUN poetry config virtualenvs.create false
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
-COPY . /usr/src/app/
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-interaction --no-root --no-cache
 
-# Copy entrypoint script
-COPY entrypoint.sh /usr/src/app/entrypoint.sh
+COPY . ${APP_ROOT}
 
-# Ensure the script is executable (this may be redundant if the permissions are correct from the host)
-RUN chmod +x /usr/src/app/entrypoint.sh
-
-# Set the entrypoint script to be executed
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
-
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "config.wsgi:application"]
