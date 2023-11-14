@@ -2,7 +2,7 @@
 name = "django-gunicorn-nginx-docker"
 version = "1.0.0"
 description = ""
-authors = ["Watt Iamsuri <wiamsuri@gmail.com>"]
+authors = ["Godot"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
